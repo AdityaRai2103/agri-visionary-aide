@@ -1,19 +1,39 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ImagePlus, Send, X, Loader2 } from "lucide-react";
+import { ImagePlus, Send, X, Loader2, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { VoiceInput } from "./VoiceInput";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface ChatInputProps {
-  onSend: (message: string, imageFile?: File) => void;
+  onSend: (message: string, imageFile?: File, language?: string) => void;
   isLoading: boolean;
+  defaultLanguage?: string;
 }
 
-export function ChatInput({ onSend, isLoading }: ChatInputProps) {
+const LANGUAGES = [
+  { code: "en", name: "English", flag: "🇬🇧" },
+  { code: "hi", name: "हिंदी", flag: "🇮🇳" },
+  { code: "mr", name: "मराठी", flag: "🇮🇳" },
+];
+
+export function ChatInput({ onSend, isLoading, defaultLanguage = "en" }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [language, setLanguage] = useState(defaultLanguage);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setLanguage(defaultLanguage);
+  }, [defaultLanguage]);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -39,7 +59,7 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
     e.preventDefault();
     if (!message.trim() && !imageFile) return;
     
-    onSend(message, imageFile || undefined);
+    onSend(message, imageFile || undefined, language);
     setMessage("");
     handleRemoveImage();
   };
@@ -48,6 +68,25 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSubmit(e);
+    }
+  };
+
+  const handleVoiceTranscript = (text: string, detectedLanguage: string) => {
+    setMessage(prev => prev ? `${prev} ${text}` : text);
+    // Auto-detect language from voice
+    if (detectedLanguage && LANGUAGES.find(l => l.code === detectedLanguage)) {
+      setLanguage(detectedLanguage);
+    }
+  };
+
+  const getPlaceholder = () => {
+    switch (language) {
+      case "hi":
+        return "फसलों, बीमारियों, मौसम के बारे में पूछें या फोटो अपलोड करें...";
+      case "mr":
+        return "पिके, रोग, हवामानाबद्दल विचारा किंवा फोटो अपलोड करा...";
+      default:
+        return "Ask about crops, diseases, weather, or upload a photo...";
     }
   };
 
@@ -73,6 +112,23 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
 
       {/* Input Area */}
       <div className="flex items-end gap-2 p-2 bg-card rounded-2xl shadow-card border border-border/50">
+        {/* Language Selector */}
+        <Select value={language} onValueChange={setLanguage}>
+          <SelectTrigger className="w-auto border-0 bg-transparent hover:bg-muted/50 h-10 px-2">
+            <span className="text-lg">{LANGUAGES.find(l => l.code === language)?.flag}</span>
+          </SelectTrigger>
+          <SelectContent>
+            {LANGUAGES.map(lang => (
+              <SelectItem key={lang.code} value={lang.code}>
+                <span className="flex items-center gap-2">
+                  <span>{lang.flag}</span>
+                  <span>{lang.name}</span>
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
         {/* Image Upload Button */}
         <input
           ref={fileInputRef}
@@ -92,12 +148,18 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
           <ImagePlus className="w-5 h-5" />
         </Button>
 
+        {/* Voice Input */}
+        <VoiceInput
+          onTranscript={handleVoiceTranscript}
+          disabled={isLoading}
+        />
+
         {/* Text Input */}
         <Textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Ask about crops, diseases, weather, or upload a photo..."
+          placeholder={getPlaceholder()}
           className="flex-1 min-h-[44px] max-h-32 resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
           disabled={isLoading}
           rows={1}
@@ -124,7 +186,9 @@ export function ChatInput({ onSend, isLoading }: ChatInputProps) {
       </div>
 
       <p className="text-xs text-muted-foreground text-center mt-2">
-        Upload crop images for disease detection or ask questions about farming
+        {language === "hi" ? "फसल की तस्वीरें अपलोड करें या खेती के बारे में सवाल पूछें" :
+         language === "mr" ? "पिकांचे फोटो अपलोड करा किंवा शेतीबद्दल प्रश्न विचारा" :
+         "Upload crop images for disease detection or ask questions about farming"}
       </p>
     </form>
   );

@@ -27,6 +27,7 @@ export interface Message {
   timestamp: Date;
   agentsInvolved?: AgentType[];
   sources?: string[];
+  language?: string;
 }
 
 export interface AgentActivity {

@@ -4,7 +4,7 @@ import { AgentGrid } from "@/components/AgentGrid";
 import { ChatMessage } from "@/components/ChatMessage";
 import { ChatInput } from "@/components/ChatInput";
 import { ConversationSidebar } from "@/components/ConversationSidebar";
-import { UserMenu } from "@/components/UserMenu";
+
 import { useAgriChat } from "@/hooks/useAgriChat";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/contexts/ThemeContext";
@@ -119,12 +119,7 @@ export default function Index() {
       <div className="flex-1 flex flex-col min-h-screen relative z-10">
         {/* Header with User Menu */}
         <div className="relative">
-          <Header />
-          {profile && (
-            <div className="absolute top-3 right-16">
-              <UserMenu profile={profile} onSignOut={signOut} />
-            </div>
-          )}
+          <Header profile={profile} onSignOut={signOut} />
         </div>
 
         {/* Main Chat Area */}

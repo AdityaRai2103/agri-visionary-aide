@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { 
   ArrowLeft, User, MapPin, Phone, Wheat, LandPlot, 
-  Loader2, Save, Plus, X, Sprout, CheckCircle2 
+  Loader2, Save, Plus, X, Sprout, CheckCircle2, AlertCircle
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +21,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+
+// Phone validation regex - accepts formats like +91 98765 43210, 9876543210, etc.
+const phoneRegex = /^(\+?[1-9]\d{0,2}[\s-]?)?(\(?\d{2,4}\)?[\s-]?)?\d{6,10}$/;
+
+const profileFormSchema = z.object({
+  displayName: z.string()
+    .max(100, "Name must be less than 100 characters")
+    .optional()
+    .or(z.literal("")),
+  phoneNumber: z.string()
+    .refine(val => !val || phoneRegex.test(val.replace(/\s/g, '')), {
+      message: "Please enter a valid phone number (e.g., +91 98765 43210)",
+    })
+    .optional()
+    .or(z.literal("")),
+  location: z.string()
+    .max(200, "Location must be less than 200 characters")
+    .optional()
+    .or(z.literal("")),
+  farmSize: z.string().optional(),
+});
+
+type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 const COMMON_CROPS = [
   "Rice", "Wheat", "Cotton", "Sugarcane", "Maize", "Soybean",
@@ -39,24 +71,30 @@ export default function Profile() {
   const { user, profile } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-
-  // Form state
-  const [displayName, setDisplayName] = useState("");
-  const [location, setLocation] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [farmSize, setFarmSize] = useState("");
   const [currentCrops, setCurrentCrops] = useState<string[]>([]);
   const [newCrop, setNewCrop] = useState("");
 
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileFormSchema),
+    defaultValues: {
+      displayName: "",
+      phoneNumber: "",
+      location: "",
+      farmSize: "",
+    },
+  });
+
   useEffect(() => {
     if (profile) {
-      setDisplayName(profile.display_name || "");
-      setLocation(profile.location || "");
-      setPhoneNumber((profile as any).phone_number || "");
-      setFarmSize(profile.farm_size || "");
+      form.reset({
+        displayName: profile.display_name || "",
+        phoneNumber: (profile as any).phone_number || "",
+        location: profile.location || "",
+        farmSize: profile.farm_size || "",
+      });
       setCurrentCrops((profile as any).current_crops || profile.primary_crops || []);
     }
-  }, [profile]);
+  }, [profile, form]);
 
   const handleAddCrop = () => {
     if (newCrop.trim() && !currentCrops.includes(newCrop.trim())) {
@@ -75,42 +113,20 @@ export default function Profile() {
     }
   };
 
-  const validatePhoneNumber = (phone: string): boolean => {
-    if (!phone) return true; // Optional field
-    const phoneRegex = /^[+]?[\d\s-]{10,15}$/;
-    return phoneRegex.test(phone.replace(/\s/g, ''));
-  };
-
-  const handleSave = async () => {
+  const onSubmit = async (values: ProfileFormValues) => {
     if (!user) return;
-
-    // Validation
-    if (displayName.trim().length > 100) {
-      toast.error("Name must be less than 100 characters");
-      return;
-    }
-
-    if (location.trim().length > 200) {
-      toast.error("Location must be less than 200 characters");
-      return;
-    }
-
-    if (!validatePhoneNumber(phoneNumber)) {
-      toast.error("Please enter a valid phone number");
-      return;
-    }
 
     setIsLoading(true);
 
     const { error } = await supabase
       .from("profiles")
       .update({
-        display_name: displayName.trim() || null,
-        location: location.trim() || null,
-        phone_number: phoneNumber.trim() || null,
-        farm_size: farmSize || null,
+        display_name: values.displayName?.trim() || null,
+        location: values.location?.trim() || null,
+        phone_number: values.phoneNumber?.trim() || null,
+        farm_size: values.farmSize || null,
         current_crops: currentCrops,
-        primary_crops: currentCrops, // Keep in sync
+        primary_crops: currentCrops,
         updated_at: new Date().toISOString(),
       })
       .eq("user_id", user.id);
@@ -170,159 +186,199 @@ export default function Profile() {
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-6">
-            {/* Display Name */}
-            <div className="space-y-2">
-              <Label htmlFor="name" className="text-sm font-medium flex items-center gap-2">
-                <User className="w-4 h-4 text-muted-foreground" />
-                Full Name
-              </Label>
-              <Input
-                id="name"
-                value={displayName}
-                onChange={(e) => setDisplayName(e.target.value)}
-                placeholder="Enter your name"
-                className="h-12 rounded-xl bg-muted/30 border-border/50 focus:border-primary/50"
-                maxLength={100}
-              />
-            </div>
-
-            {/* Phone Number */}
-            <div className="space-y-2">
-              <Label htmlFor="phone" className="text-sm font-medium flex items-center gap-2">
-                <Phone className="w-4 h-4 text-muted-foreground" />
-                Phone Number
-              </Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="+91 98765 43210"
-                className="h-12 rounded-xl bg-muted/30 border-border/50 focus:border-primary/50"
-                maxLength={15}
-              />
-            </div>
-
-            {/* Location */}
-            <div className="space-y-2">
-              <Label htmlFor="location" className="text-sm font-medium flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-muted-foreground" />
-                Location (Village/District/State)
-              </Label>
-              <Input
-                id="location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="e.g., Nashik, Maharashtra"
-                className="h-12 rounded-xl bg-muted/30 border-border/50 focus:border-primary/50"
-                maxLength={200}
-              />
-            </div>
-
-            {/* Farm Size */}
-            <div className="space-y-2">
-              <Label htmlFor="farmSize" className="text-sm font-medium flex items-center gap-2">
-                <LandPlot className="w-4 h-4 text-muted-foreground" />
-                Land Size
-              </Label>
-              <Select value={farmSize} onValueChange={setFarmSize}>
-                <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-border/50 focus:border-primary/50">
-                  <SelectValue placeholder="Select your farm size" />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl border-border/50 bg-popover/95 backdrop-blur-xl">
-                  {FARM_SIZES.map(size => (
-                    <SelectItem key={size.value} value={size.value} className="rounded-lg">
-                      {size.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Current Crops */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium flex items-center gap-2">
-                <Wheat className="w-4 h-4 text-muted-foreground" />
-                Current Crops in Field
-              </Label>
-              
-              {/* Selected Crops */}
-              {currentCrops.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {currentCrops.map(crop => (
-                    <Badge
-                      key={crop}
-                      variant="secondary"
-                      className="pl-3 pr-1 py-1.5 rounded-lg bg-primary/10 text-primary border-primary/20 flex items-center gap-1"
-                    >
-                      {crop}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveCrop(crop)}
-                        className="p-0.5 hover:bg-primary/20 rounded-full transition-colors"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              )}
-
-              {/* Add Custom Crop */}
-              <div className="flex gap-2">
-                <Input
-                  value={newCrop}
-                  onChange={(e) => setNewCrop(e.target.value)}
-                  placeholder="Add a crop..."
-                  className="flex-1 h-11 rounded-xl bg-muted/30 border-border/50 focus:border-primary/50"
-                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCrop())}
-                  maxLength={50}
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                {/* Display Name */}
+                <FormField
+                  control={form.control}
+                  name="displayName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium flex items-center gap-2">
+                        <User className="w-4 h-4 text-muted-foreground" />
+                        Full Name
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter your name"
+                          className="h-12 rounded-xl bg-muted/30 border-border/50 focus:border-primary/50"
+                          maxLength={100}
+                        />
+                      </FormControl>
+                      <FormMessage className="flex items-center gap-1 text-destructive">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                      </FormMessage>
+                    </FormItem>
+                  )}
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={handleAddCrop}
-                  className="h-11 w-11 rounded-xl border-border/50 hover:bg-primary/10 hover:border-primary/30"
-                >
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
 
-              {/* Common Crops Quick Add */}
-              <div className="space-y-2">
-                <p className="text-xs text-muted-foreground">Quick add common crops:</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {COMMON_CROPS.filter(c => !currentCrops.includes(c)).slice(0, 8).map(crop => (
-                    <button
-                      key={crop}
+                {/* Phone Number */}
+                <FormField
+                  control={form.control}
+                  name="phoneNumber"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium flex items-center gap-2">
+                        <Phone className="w-4 h-4 text-muted-foreground" />
+                        Phone Number
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="tel"
+                          placeholder="+91 98765 43210"
+                          className="h-12 rounded-xl bg-muted/30 border-border/50 focus:border-primary/50"
+                          maxLength={20}
+                        />
+                      </FormControl>
+                      <FormMessage className="flex items-center gap-1 text-destructive">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                      </FormMessage>
+                    </FormItem>
+                  )}
+                />
+
+                {/* Location */}
+                <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-muted-foreground" />
+                        Location (Village/District/State)
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="e.g., Nashik, Maharashtra"
+                          className="h-12 rounded-xl bg-muted/30 border-border/50 focus:border-primary/50"
+                          maxLength={200}
+                        />
+                      </FormControl>
+                      <FormMessage className="flex items-center gap-1 text-destructive">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                      </FormMessage>
+                    </FormItem>
+                  )}
+                />
+
+                {/* Farm Size */}
+                <FormField
+                  control={form.control}
+                  name="farmSize"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium flex items-center gap-2">
+                        <LandPlot className="w-4 h-4 text-muted-foreground" />
+                        Land Size
+                      </FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-border/50 focus:border-primary/50">
+                            <SelectValue placeholder="Select your farm size" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="rounded-xl border-border/50 bg-popover/95 backdrop-blur-xl">
+                          {FARM_SIZES.map(size => (
+                            <SelectItem key={size.value} value={size.value} className="rounded-lg">
+                              {size.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Current Crops */}
+                <div className="space-y-3">
+                  <FormLabel className="text-sm font-medium flex items-center gap-2">
+                    <Wheat className="w-4 h-4 text-muted-foreground" />
+                    Current Crops in Field
+                  </FormLabel>
+                  
+                  {/* Selected Crops */}
+                  {currentCrops.length > 0 && (
+                    <div className="flex flex-wrap gap-2">
+                      {currentCrops.map(crop => (
+                        <Badge
+                          key={crop}
+                          variant="secondary"
+                          className="pl-3 pr-1 py-1.5 rounded-lg bg-primary/10 text-primary border-primary/20 flex items-center gap-1"
+                        >
+                          {crop}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveCrop(crop)}
+                            className="p-0.5 hover:bg-primary/20 rounded-full transition-colors"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Add Custom Crop */}
+                  <div className="flex gap-2">
+                    <Input
+                      value={newCrop}
+                      onChange={(e) => setNewCrop(e.target.value)}
+                      placeholder="Add a crop..."
+                      className="flex-1 h-11 rounded-xl bg-muted/30 border-border/50 focus:border-primary/50"
+                      onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCrop())}
+                      maxLength={50}
+                    />
+                    <Button
                       type="button"
-                      onClick={() => handleAddCommonCrop(crop)}
-                      className="px-2.5 py-1 text-xs rounded-lg bg-muted/50 hover:bg-primary/10 hover:text-primary border border-border/30 hover:border-primary/30 transition-all"
+                      variant="outline"
+                      size="icon"
+                      onClick={handleAddCrop}
+                      className="h-11 w-11 rounded-xl border-border/50 hover:bg-primary/10 hover:border-primary/30"
                     >
-                      + {crop}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
 
-            {/* Save Button */}
-            <Button
-              onClick={handleSave}
-              disabled={isLoading}
-              className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-secondary hover:opacity-90 shadow-glow hover:shadow-elevated transition-all"
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin mr-2" />
-              ) : isSaved ? (
-                <CheckCircle2 className="w-5 h-5 mr-2" />
-              ) : (
-                <Save className="w-5 h-5 mr-2" />
-              )}
-              {isSaved ? "Saved!" : "Save Profile"}
-            </Button>
+                  {/* Common Crops Quick Add */}
+                  <div className="space-y-2">
+                    <p className="text-xs text-muted-foreground">Quick add common crops:</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      {COMMON_CROPS.filter(c => !currentCrops.includes(c)).slice(0, 8).map(crop => (
+                        <button
+                          key={crop}
+                          type="button"
+                          onClick={() => handleAddCommonCrop(crop)}
+                          className="px-2.5 py-1 text-xs rounded-lg bg-muted/50 hover:bg-primary/10 hover:text-primary border border-border/30 hover:border-primary/30 transition-all"
+                        >
+                          + {crop}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Save Button */}
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-secondary hover:opacity-90 shadow-glow hover:shadow-elevated transition-all"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                  ) : isSaved ? (
+                    <CheckCircle2 className="w-5 h-5 mr-2" />
+                  ) : (
+                    <Save className="w-5 h-5 mr-2" />
+                  )}
+                  {isSaved ? "Saved!" : "Save Profile"}
+                </Button>
+              </form>
+            </Form>
           </CardContent>
         </Card>
       </div>

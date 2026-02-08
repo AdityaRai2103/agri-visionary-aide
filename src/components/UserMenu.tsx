@@ -9,6 +9,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent,
+  DropdownMenuPortal,
 } from "@/components/ui/dropdown-menu";
 import {
   Dialog,
@@ -25,7 +29,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, Settings, LogOut, Globe, Loader2, Wheat } from "lucide-react";
+import { User, Settings, LogOut, Globe, Loader2, Wheat, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 
@@ -94,27 +98,40 @@ export function UserMenu({ profile, onSignOut }: UserMenuProps) {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-border/50" />
-          <DropdownMenuItem 
-            onClick={() => navigate("/profile")}
-            className="rounded-lg cursor-pointer"
-          >
-            <Wheat className="mr-2 h-4 w-4" />
-            <span>My Farm Profile</span>
-          </DropdownMenuItem>
+          
+          {/* Profile Submenu with Farm Profile and Logout */}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger className="rounded-lg cursor-pointer">
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuPortal>
+              <DropdownMenuSubContent className="rounded-xl border-border/50 bg-popover/95 backdrop-blur-xl">
+                <DropdownMenuItem 
+                  onClick={() => navigate("/profile")}
+                  className="rounded-lg cursor-pointer"
+                >
+                  <Wheat className="mr-2 h-4 w-4" />
+                  <span>My Farm Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-border/50" />
+                <DropdownMenuItem 
+                  onClick={onSignOut} 
+                  className="text-destructive rounded-lg cursor-pointer focus:text-destructive"
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuSubContent>
+            </DropdownMenuPortal>
+          </DropdownMenuSub>
+
           <DropdownMenuItem 
             onClick={() => setIsSettingsOpen(true)}
             className="rounded-lg cursor-pointer"
           >
             <Settings className="mr-2 h-4 w-4" />
             <span>Language Settings</span>
-          </DropdownMenuItem>
-          <DropdownMenuSeparator className="bg-border/50" />
-          <DropdownMenuItem 
-            onClick={onSignOut} 
-            className="text-destructive rounded-lg cursor-pointer focus:text-destructive"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Log out</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

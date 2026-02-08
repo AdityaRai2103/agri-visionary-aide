@@ -85,31 +85,29 @@ ${agentInstructions}
    - What treatments have been tried?
    - What is the location/region?
 
-2. **Multi-Agent Collaboration**: Each active agent should contribute their perspective. Structure your response to show insights from each agent.
+2. **Multi-Agent Collaboration**: Each active agent contributes their perspective internally. You must aggregate all insights into a single unified response.
 
 3. **Response Format**:
-   - Start with any clarifying questions if needed (marked with ❓)
-   - Provide a brief summary/diagnosis
-   - Show agent-specific insights (use agent badges)
-   - Give detailed recommendations with specific quantities and timings
-   - Include preventive measures
-   - Suggest follow-up actions
+   - Start with any clarifying questions if needed (use "Question:" prefix)
+   - Provide a brief summary/diagnosis in 1-2 sentences
+   - Present detailed recommendations as bullet points with specific quantities and timings
+   - Include preventive measures as bullet points
+   - Suggest follow-up actions as bullet points
+   - DO NOT use any emojis in your response
+   - DO NOT mention which agent is providing which information inline
+   - At the very end, list the agents that contributed to this response in a simple line
 
-4. **Agent Badges**: Use these emoji badges to indicate which agent is providing information:
-   - 🎯 Orchestrator
-   - 👁️ Vision Agent
-   - 💬 Text Agent
-   - 🌾 Crop Intelligence
-   - ⛅ Weather Agent
-   - 🌱 Soil Agent
-   - 📋 Recommendation Agent
-   - 💰 Market Agent
+4. **No Emojis**: Never use emojis or emoticons in your response. Keep it professional and text-only.
 
-5. **Citations**: When using web search results, cite the sources.
+5. **Aggregated Response**: Combine insights from all agents into cohesive bullet points. Do not separate by agent - present unified recommendations.
 
-6. **Local Context**: Always consider Maharashtra's specific conditions - climate zones, common crop varieties, local practices, and government schemes.
+6. **Citations**: When using web search results, cite the sources.
 
-7. **Safety**: For severe issues, always recommend consulting local agricultural extension officers or Krishi Vigyan Kendras.`;
+7. **Local Context**: Always consider Maharashtra's specific conditions - climate zones, common crop varieties, local practices, and government schemes.
+
+8. **Safety**: For severe issues, always recommend consulting local agricultural extension officers or Krishi Vigyan Kendras.
+
+9. **Agent Attribution**: At the end of your response, add a line: "Agents consulted: [list agent names separated by commas]"`;
 }
 
 export function buildClarifyingPrompt(message: string, language: string): string {

@@ -13,14 +13,14 @@ export function ChatMessage({ message }: ChatMessageProps) {
   return (
     <div
       className={cn(
-        "flex gap-3 animate-fade-in",
+        "flex gap-3 animate-fade-in group",
         isUser ? "flex-row-reverse" : "flex-row"
       )}
     >
       {/* Avatar */}
       <div
         className={cn(
-          "flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-soft",
+          "flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-soft transition-transform duration-200 group-hover:scale-105",
           isUser
             ? "bg-primary text-primary-foreground"
             : "bg-accent text-accent-foreground"
@@ -32,7 +32,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       {/* Content */}
       <div
         className={cn(
-          "flex-1 max-w-[80%] rounded-2xl p-4 shadow-soft",
+          "flex-1 max-w-[80%] rounded-2xl p-4 shadow-soft transition-all duration-200 hover:shadow-card",
           isUser
             ? "bg-primary text-primary-foreground rounded-tr-sm"
             : "bg-card border border-border/50 rounded-tl-sm"

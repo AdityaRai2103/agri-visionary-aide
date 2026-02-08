@@ -50,12 +50,12 @@ export function AgentCard({ agent, compact = false }: AgentCardProps) {
   return (
     <div
       className={cn(
-        "relative p-4 rounded-xl border transition-all duration-300 shadow-soft hover:shadow-card",
+        "relative p-4 rounded-xl border transition-all duration-300 shadow-soft hover:shadow-card hover:-translate-y-1 cursor-pointer group",
         statusStyles[agent.status]
       )}
     >
       <div className="flex items-start gap-3">
-        <div className="text-2xl">{agent.icon}</div>
+        <div className="text-2xl group-hover:scale-110 transition-transform duration-200">{agent.icon}</div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <h4 className="font-semibold text-sm">{agent.name}</h4>

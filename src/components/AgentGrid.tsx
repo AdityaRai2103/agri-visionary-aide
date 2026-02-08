@@ -19,8 +19,14 @@ export function AgentGrid({ agents, compact = false }: AgentGridProps) {
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-      {agents.map((agent) => (
-        <AgentCard key={agent.id} agent={agent} />
+      {agents.map((agent, index) => (
+        <div 
+          key={agent.id} 
+          className="animate-fade-in"
+          style={{ animationDelay: `${index * 50}ms` }}
+        >
+          <AgentCard agent={agent} />
+        </div>
       ))}
     </div>
   );

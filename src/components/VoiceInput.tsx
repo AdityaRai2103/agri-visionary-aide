@@ -156,12 +156,16 @@ export function VoiceInput({ onTranscript, disabled }: VoiceInputProps) {
       {isRecording && (
         <>
           <div 
-            className="absolute inset-0 rounded-full bg-destructive/20 animate-ping"
-            style={{ transform: `scale(${1 + audioLevel * 0.5})` }}
+            className="absolute inset-0 rounded-full bg-destructive/30 animate-ping"
+            style={{ transform: `scale(${1 + audioLevel * 0.6})` }}
+          />
+          <div 
+            className="absolute inset-0 rounded-full bg-destructive/20"
+            style={{ transform: `scale(${1 + audioLevel * 0.4})` }}
           />
           <div 
             className="absolute inset-0 rounded-full bg-destructive/10"
-            style={{ transform: `scale(${1 + audioLevel * 0.3})` }}
+            style={{ transform: `scale(${1 + audioLevel * 0.2})` }}
           />
         </>
       )}
@@ -173,9 +177,9 @@ export function VoiceInput({ onTranscript, disabled }: VoiceInputProps) {
         onClick={handleClick}
         disabled={disabled || isProcessing}
         className={cn(
-          "relative z-10 transition-all",
-          isRecording && "animate-pulse",
-          !isRecording && "text-muted-foreground hover:text-primary hover:bg-primary/10"
+          "relative z-10 transition-all duration-200",
+          isRecording && "animate-pulse scale-110",
+          !isRecording && "text-muted-foreground hover:text-primary hover:bg-primary/10 hover:scale-105"
         )}
       >
         {isProcessing ? (

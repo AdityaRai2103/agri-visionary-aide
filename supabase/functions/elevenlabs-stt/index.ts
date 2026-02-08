@@ -16,8 +16,18 @@ serve(async (req) => {
     if (!rawApiKey) {
       throw new Error("ELEVENLABS_API_KEY is not configured");
     }
-    // Trim whitespace and newlines that can cause ByteString errors
-    const ELEVENLABS_API_KEY = rawApiKey.trim().replace(/[\r\n]/g, "");
+    
+    // Sanitize API key - remove all non-ASCII and control characters
+    const ELEVENLABS_API_KEY = rawApiKey
+      .trim()
+      .replace(/[\r\n\t]/g, "")
+      .replace(/[^\x20-\x7E]/g, ""); // Keep only printable ASCII
+    
+    console.log("API key length after sanitization:", ELEVENLABS_API_KEY.length);
+    
+    if (ELEVENLABS_API_KEY.length === 0) {
+      throw new Error("ELEVENLABS_API_KEY is empty after sanitization - please re-enter your API key");
+    }
 
     const { audioBase64 } = await req.json();
 
@@ -37,12 +47,14 @@ serve(async (req) => {
     formData.append("file", new Blob([bytes], { type: "audio/webm" }), "audio.webm");
     formData.append("model_id", "scribe_v2");
 
+    // Create headers object explicitly to avoid ByteString issues
+    const headers = new Headers();
+    headers.set("xi-api-key", ELEVENLABS_API_KEY);
+
     // Call ElevenLabs Speech-to-Text API
     const response = await fetch("https://api.elevenlabs.io/v1/speech-to-text", {
       method: "POST",
-      headers: {
-        "xi-api-key": ELEVENLABS_API_KEY,
-      },
+      headers: headers,
       body: formData,
     });
 

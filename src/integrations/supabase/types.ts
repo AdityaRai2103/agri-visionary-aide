@@ -86,10 +86,12 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          current_crops: string[] | null
           display_name: string | null
           farm_size: string | null
           id: string
           location: string | null
+          phone_number: string | null
           preferred_language: string | null
           primary_crops: string[] | null
           updated_at: string
@@ -98,10 +100,12 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          current_crops?: string[] | null
           display_name?: string | null
           farm_size?: string | null
           id?: string
           location?: string | null
+          phone_number?: string | null
           preferred_language?: string | null
           primary_crops?: string[] | null
           updated_at?: string
@@ -110,10 +114,12 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          current_crops?: string[] | null
           display_name?: string | null
           farm_size?: string | null
           id?: string
           location?: string | null
+          phone_number?: string | null
           preferred_language?: string | null
           primary_crops?: string[] | null
           updated_at?: string

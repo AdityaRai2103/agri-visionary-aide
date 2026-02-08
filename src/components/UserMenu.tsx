@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth, Profile } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,8 +17,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -26,8 +25,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, Settings, LogOut, Globe, Loader2 } from "lucide-react";
+import { User, Settings, LogOut, Globe, Loader2, Wheat } from "lucide-react";
 import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
 
 interface UserMenuProps {
   profile: Profile | null;
@@ -41,19 +41,16 @@ const LANGUAGES = [
 ];
 
 export function UserMenu({ profile, onSignOut }: UserMenuProps) {
+  const navigate = useNavigate();
   const { updateProfile } = useAuth();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [displayName, setDisplayName] = useState(profile?.display_name || "");
-  const [location, setLocation] = useState(profile?.location || "");
   const [preferredLanguage, setPreferredLanguage] = useState(profile?.preferred_language || "en");
 
   const handleSaveSettings = async () => {
     setIsSaving(true);
     
     const { error } = await updateProfile({
-      display_name: displayName,
-      location,
       preferred_language: preferredLanguage,
     });
 
@@ -78,16 +75,16 @@ export function UserMenu({ profile, onSignOut }: UserMenuProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-            <Avatar className="h-10 w-10 border-2 border-primary/20">
+          <Button variant="ghost" className="relative h-10 w-10 rounded-xl hover:bg-muted/50">
+            <Avatar className="h-10 w-10 border-2 border-primary/30 shadow-soft">
               <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.display_name || "User"} />
-              <AvatarFallback className="bg-primary/10 text-primary">
+              <AvatarFallback className="bg-gradient-to-br from-primary/20 to-secondary/20 text-primary font-medium">
                 {initials}
               </AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-56" align="end" forceMount>
+        <DropdownMenuContent className="w-56 rounded-xl border-border/50 bg-popover/95 backdrop-blur-xl" align="end" forceMount>
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
               <p className="text-sm font-medium leading-none">{profile?.display_name || "User"}</p>
@@ -96,13 +93,26 @@ export function UserMenu({ profile, onSignOut }: UserMenuProps) {
               </p>
             </div>
           </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => setIsSettingsOpen(true)}>
-            <Settings className="mr-2 h-4 w-4" />
-            <span>Settings</span>
+          <DropdownMenuSeparator className="bg-border/50" />
+          <DropdownMenuItem 
+            onClick={() => navigate("/profile")}
+            className="rounded-lg cursor-pointer"
+          >
+            <Wheat className="mr-2 h-4 w-4" />
+            <span>My Farm Profile</span>
           </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onSignOut} className="text-destructive">
+          <DropdownMenuItem 
+            onClick={() => setIsSettingsOpen(true)}
+            className="rounded-lg cursor-pointer"
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Language Settings</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator className="bg-border/50" />
+          <DropdownMenuItem 
+            onClick={onSignOut} 
+            className="text-destructive rounded-lg cursor-pointer focus:text-destructive"
+          >
             <LogOut className="mr-2 h-4 w-4" />
             <span>Log out</span>
           </DropdownMenuItem>
@@ -110,49 +120,30 @@ export function UserMenu({ profile, onSignOut }: UserMenuProps) {
       </DropdownMenu>
 
       <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md rounded-2xl border-border/50 bg-card/95 backdrop-blur-xl">
           <DialogHeader>
-            <DialogTitle>Profile Settings</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              <Globe className="w-5 h-5 text-primary" />
+              Language Settings
+            </DialogTitle>
             <DialogDescription>
-              Update your profile and preferences
+              Choose your preferred language for the app
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="display-name">Display Name</Label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  id="display-name"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Your name"
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
-              <Input
-                id="location"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="e.g., Pune, Maharashtra"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="language">Preferred Language</Label>
+              <Label htmlFor="language" className="text-sm font-medium">Preferred Language</Label>
               <Select value={preferredLanguage} onValueChange={setPreferredLanguage}>
-                <SelectTrigger>
+                <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-border/50">
                   <div className="flex items-center gap-2">
                     <Globe className="w-4 h-4 text-muted-foreground" />
                     <SelectValue />
                   </div>
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-xl border-border/50 bg-popover/95 backdrop-blur-xl">
                   {LANGUAGES.map(lang => (
-                    <SelectItem key={lang.code} value={lang.code}>
-                      <span>{lang.nativeName}</span>
+                    <SelectItem key={lang.code} value={lang.code} className="rounded-lg">
+                      <span className="font-medium">{lang.nativeName}</span>
                       <span className="text-muted-foreground ml-2">({lang.name})</span>
                     </SelectItem>
                   ))}
@@ -161,10 +152,18 @@ export function UserMenu({ profile, onSignOut }: UserMenuProps) {
             </div>
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setIsSettingsOpen(false)}>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsSettingsOpen(false)}
+              className="rounded-xl border-border/50"
+            >
               Cancel
             </Button>
-            <Button onClick={handleSaveSettings} disabled={isSaving}>
+            <Button 
+              onClick={handleSaveSettings} 
+              disabled={isSaving}
+              className="rounded-xl bg-gradient-to-r from-primary to-secondary hover:opacity-90"
+            >
               {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Save Changes
             </Button>

@@ -156,12 +156,15 @@ export function VoiceInput({ onTranscript, disabled }: VoiceInputProps) {
       {isRecording && (
         <div className="absolute inset-0 flex items-center justify-center">
           <div 
-            className="absolute w-12 h-12 rounded-full bg-destructive/20 animate-ping"
-            style={{ transform: `scale(${1 + audioLevel * 0.8})` }}
+            className="absolute w-14 h-14 rounded-full bg-gradient-to-br from-destructive/30 to-secondary/30"
+            style={{ 
+              transform: `scale(${1 + audioLevel * 1.2})`,
+              opacity: 0.6 + audioLevel * 0.4
+            }}
           />
           <div 
-            className="absolute w-10 h-10 rounded-full bg-destructive/15"
-            style={{ transform: `scale(${1 + audioLevel * 0.5})` }}
+            className="absolute w-12 h-12 rounded-full bg-gradient-to-br from-destructive/20 to-secondary/20 animate-ping"
+            style={{ transform: `scale(${1 + audioLevel * 0.8})` }}
           />
         </div>
       )}
@@ -173,9 +176,9 @@ export function VoiceInput({ onTranscript, disabled }: VoiceInputProps) {
         onClick={handleClick}
         disabled={disabled || isProcessing}
         className={cn(
-          "relative z-10 h-10 w-10 rounded-xl transition-all duration-300",
-          isRecording && "animate-pulse scale-110 shadow-elevated",
-          !isRecording && "text-muted-foreground hover:text-primary hover:bg-primary/10 hover:scale-105"
+          "relative z-10 h-11 w-11 rounded-xl transition-all duration-300",
+          isRecording && "bg-gradient-to-br from-destructive to-secondary scale-110 shadow-glow",
+          !isRecording && "text-muted-foreground hover:text-primary hover:bg-primary/10 hover:scale-105 hover:shadow-soft"
         )}
       >
         {isProcessing ? (

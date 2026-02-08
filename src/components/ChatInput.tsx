@@ -107,7 +107,7 @@ export function ChatInput({ onSend, isLoading, defaultLanguage = "en", onAutoSub
           <img
             src={imagePreview}
             alt="Preview"
-            className="h-16 w-auto rounded-xl shadow-soft border border-border/50 object-cover"
+            className="h-20 w-auto rounded-xl shadow-card border border-border/50 object-cover"
           />
           <button
             type="button"
@@ -120,18 +120,18 @@ export function ChatInput({ onSend, isLoading, defaultLanguage = "en", onAutoSub
       )}
 
       {/* Modern Input Area */}
-      <div className="flex items-center gap-1.5 p-1.5 bg-transparent rounded-xl">
+      <div className="flex items-center gap-2 p-2 bg-transparent rounded-xl">
         {/* Language Selector */}
         <Select value={language} onValueChange={setLanguage}>
-          <SelectTrigger className="w-auto border-0 bg-muted/50 hover:bg-muted rounded-xl h-10 px-3 transition-colors">
-            <span className="text-base">{LANGUAGES.find(l => l.code === language)?.flag}</span>
+          <SelectTrigger className="w-auto border-0 bg-muted/50 hover:bg-muted/80 rounded-xl h-11 px-3.5 transition-all duration-300 hover:shadow-soft">
+            <span className="text-lg">{LANGUAGES.find(l => l.code === language)?.flag}</span>
           </SelectTrigger>
-          <SelectContent className="rounded-xl">
+          <SelectContent className="rounded-xl border-border/50 bg-popover/95 backdrop-blur-xl">
             {LANGUAGES.map(lang => (
               <SelectItem key={lang.code} value={lang.code} className="rounded-lg">
-                <span className="flex items-center gap-2">
-                  <span>{lang.flag}</span>
-                  <span>{lang.name}</span>
+                <span className="flex items-center gap-2.5">
+                  <span className="text-lg">{lang.flag}</span>
+                  <span className="font-medium">{lang.name}</span>
                 </span>
               </SelectItem>
             ))}
@@ -151,7 +151,7 @@ export function ChatInput({ onSend, isLoading, defaultLanguage = "en", onAutoSub
           variant="ghost"
           size="icon"
           onClick={() => fileInputRef.current?.click()}
-          className="flex-shrink-0 h-10 w-10 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
+          className="flex-shrink-0 h-11 w-11 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300 hover:shadow-soft"
           disabled={isLoading}
         >
           <ImagePlus className="w-5 h-5" />
@@ -169,7 +169,7 @@ export function ChatInput({ onSend, isLoading, defaultLanguage = "en", onAutoSub
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={getPlaceholder()}
-          className="flex-1 min-h-[40px] max-h-28 resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/50 text-sm py-2.5"
+          className="flex-1 min-h-[44px] max-h-32 resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/50 text-sm py-3"
           disabled={isLoading}
           rows={1}
         />
@@ -180,21 +180,21 @@ export function ChatInput({ onSend, isLoading, defaultLanguage = "en", onAutoSub
           size="icon"
           disabled={isLoading || (!message.trim() && !imageFile)}
           className={cn(
-            "flex-shrink-0 h-10 w-10 rounded-xl transition-all duration-300",
+            "flex-shrink-0 h-11 w-11 rounded-xl transition-all duration-300",
             message.trim() || imageFile
-              ? "bg-primary hover:bg-primary/90 shadow-soft hover:shadow-elevated hover:scale-105"
+              ? "bg-gradient-to-br from-primary to-secondary hover:opacity-90 shadow-glow hover:shadow-elevated hover:scale-105"
               : "bg-muted text-muted-foreground"
           )}
         >
           {isLoading ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Loader2 className="w-5 h-5 animate-spin" />
           ) : (
-            <Send className="w-4 h-4" />
+            <Send className="w-5 h-5" />
           )}
         </Button>
       </div>
 
-      <p className="text-[11px] text-muted-foreground/70 text-center mt-2">
+      <p className="text-[11px] text-muted-foreground/60 text-center mt-2.5 font-medium">
         {language === "hi" ? "फसल की तस्वीरें अपलोड करें • आवाज से पूछें • खेती की सलाह पाएं" :
          language === "mr" ? "पिकांचे फोटो अपलोड करा • आवाजाने विचारा • शेतीची सल्ला घ्या" :
          "Upload crop images • Use voice input • Get farming advice"}

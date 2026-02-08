@@ -1,12 +1,23 @@
 import { Sprout } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { UserMenu } from "./UserMenu";
+import { Profile } from "@/hooks/useAuth";
 
-export function Header() {
+interface HeaderProps {
+  profile?: Profile | null;
+  onSignOut?: () => void;
+}
+
+export function Header({ profile, onSignOut }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 glass-strong border-b border-border/30">
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
+            {/* User Menu on the left */}
+            {profile && onSignOut && (
+              <UserMenu profile={profile} onSignOut={onSignOut} />
+            )}
             <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary text-primary-foreground shadow-glow">
               <Sprout className="w-5 h-5" />
               <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-primary/50 to-secondary/50 blur-xl opacity-50" />

@@ -151,23 +151,19 @@ export function VoiceInput({ onTranscript, disabled }: VoiceInputProps) {
   };
 
   return (
-    <div className="relative">
+    <div className="relative flex items-center justify-center">
       {/* Audio level indicator rings */}
       {isRecording && (
-        <>
+        <div className="absolute inset-0 flex items-center justify-center">
           <div 
-            className="absolute inset-0 rounded-full bg-destructive/30 animate-ping"
-            style={{ transform: `scale(${1 + audioLevel * 0.6})` }}
+            className="absolute w-12 h-12 rounded-full bg-destructive/20 animate-ping"
+            style={{ transform: `scale(${1 + audioLevel * 0.8})` }}
           />
           <div 
-            className="absolute inset-0 rounded-full bg-destructive/20"
-            style={{ transform: `scale(${1 + audioLevel * 0.4})` }}
+            className="absolute w-10 h-10 rounded-full bg-destructive/15"
+            style={{ transform: `scale(${1 + audioLevel * 0.5})` }}
           />
-          <div 
-            className="absolute inset-0 rounded-full bg-destructive/10"
-            style={{ transform: `scale(${1 + audioLevel * 0.2})` }}
-          />
-        </>
+        </div>
       )}
       
       <Button
@@ -177,8 +173,8 @@ export function VoiceInput({ onTranscript, disabled }: VoiceInputProps) {
         onClick={handleClick}
         disabled={disabled || isProcessing}
         className={cn(
-          "relative z-10 transition-all duration-200",
-          isRecording && "animate-pulse scale-110",
+          "relative z-10 h-10 w-10 rounded-xl transition-all duration-300",
+          isRecording && "animate-pulse scale-110 shadow-elevated",
           !isRecording && "text-muted-foreground hover:text-primary hover:bg-primary/10 hover:scale-105"
         )}
       >

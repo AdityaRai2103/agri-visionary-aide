@@ -90,7 +90,14 @@ export default function Index() {
   const welcome = getWelcomeMessage();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/10 flex">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/30 to-primary/5 flex">
+      {/* Animated background elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl animate-float" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-accent/5 rounded-full blur-3xl animate-float" style={{ animationDelay: "2s" }} />
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-secondary/5 rounded-full blur-3xl animate-float" style={{ animationDelay: "4s" }} />
+      </div>
+
       {/* Conversation Sidebar */}
       {user && (
         <ConversationSidebar
@@ -104,9 +111,9 @@ export default function Index() {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen">
-        {/* Header with User Menu */}
-        <div className="relative">
+      <div className="flex-1 flex flex-col min-h-screen relative z-10">
+        {/* Compact Header with User Menu */}
+        <div className="relative backdrop-blur-sm bg-background/70 border-b border-border/30">
           <Header />
           {profile && (
             <div className="absolute top-4 right-4">
@@ -115,67 +122,94 @@ export default function Index() {
           )}
         </div>
 
-        {/* Agent Grid */}
-        <div className="px-4 py-2">
-          <div className="flex items-center gap-2 mb-3">
-            <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">
-              Agent Network
-            </h2>
-            <div className="flex-1 h-px bg-border" />
+        {/* Main Chat Area */}
+        <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full px-4 py-6">
+          {/* TOP INPUT BAR - Always at top */}
+          <div className="mb-6 animate-fade-in">
+            <div className="backdrop-blur-xl bg-card/90 rounded-2xl shadow-elevated border border-border/30 p-1">
+              <ChatInput 
+                onSend={handleSend} 
+                isLoading={isLoading}
+                defaultLanguage={profile?.preferred_language || "en"}
+                onAutoSubmit={handleAutoSubmit}
+              />
+            </div>
           </div>
-          <AgentGrid agents={agents} />
-        </div>
 
-        {/* Main Chat Area - Centered with flex grow */}
-        <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full px-4 pb-4">
-          <section className="flex-1 flex flex-col min-h-0 glass rounded-2xl p-4 shadow-card overflow-hidden">
+          {/* Agent Network - Compact */}
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                AI Agents
+              </h2>
+              <div className="flex-1 h-px bg-gradient-to-r from-border to-transparent" />
+            </div>
+            <AgentGrid agents={agents} />
+          </div>
+
+          {/* Chat Messages Area */}
+          <section className="flex-1 flex flex-col min-h-0">
             {messages.length === 0 ? (
-              /* Welcome Screen - Centered */
+              /* Welcome Screen */
               <div className="flex-1 flex flex-col items-center justify-center text-center p-8 animate-fade-in">
-                <div className="relative mb-6">
-                  <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center animate-float hover-glow">
-                    <Leaf className="w-10 h-10 text-primary" />
+                <div className="relative mb-8">
+                  <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center animate-float shadow-elevated backdrop-blur-sm">
+                    <Leaf className="w-12 h-12 text-primary" />
                   </div>
-                  <Sparkles className="absolute -top-2 -right-2 w-6 h-6 text-accent animate-bounce-subtle" />
+                  <div className="absolute -top-1 -right-1 w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center animate-bounce-subtle">
+                    <Sparkles className="w-4 h-4 text-accent" />
+                  </div>
                 </div>
-                <h2 className="text-2xl font-bold mb-2">{welcome.greeting}</h2>
+                
+                <h2 className="text-3xl font-bold mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+                  {welcome.greeting}
+                </h2>
                 <p className="text-lg text-primary font-medium mb-2">{welcome.subtitle}</p>
-                <p className="text-muted-foreground mb-8 max-w-md">
+                <p className="text-muted-foreground mb-10 max-w-md">
                   {welcome.description}
                 </p>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-lg stagger-animation">
-                  <div className="p-4 rounded-xl bg-card border border-border/50 shadow-soft hover-lift cursor-pointer group">
-                    <Camera className="w-6 h-6 text-agent-vision mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                    <h3 className="font-medium text-sm">Crop Analysis</h3>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Upload photos for disease detection
+                {/* Feature Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-2xl mb-10">
+                  <div className="group p-5 rounded-2xl bg-gradient-to-br from-card to-card/50 border border-border/30 shadow-soft hover:shadow-elevated transition-all duration-300 cursor-pointer hover:-translate-y-1">
+                    <div className="w-12 h-12 rounded-xl bg-agent-vision/10 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                      <Camera className="w-6 h-6 text-agent-vision" />
+                    </div>
+                    <h3 className="font-semibold text-sm">Crop Analysis</h3>
+                    <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                      Upload photos for instant disease detection
                     </p>
                   </div>
-                  <div className="p-4 rounded-xl bg-card border border-border/50 shadow-soft hover-lift cursor-pointer group">
-                    <MessageSquare className="w-6 h-6 text-agent-text mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                    <h3 className="font-medium text-sm">Ask Questions</h3>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Get farming advice instantly
+                  <div className="group p-5 rounded-2xl bg-gradient-to-br from-card to-card/50 border border-border/30 shadow-soft hover:shadow-elevated transition-all duration-300 cursor-pointer hover:-translate-y-1">
+                    <div className="w-12 h-12 rounded-xl bg-agent-text/10 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                      <MessageSquare className="w-6 h-6 text-agent-text" />
+                    </div>
+                    <h3 className="font-semibold text-sm">Ask Questions</h3>
+                    <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                      Get expert farming advice instantly
                     </p>
                   </div>
-                  <div className="p-4 rounded-xl bg-card border border-border/50 shadow-soft hover-lift cursor-pointer group">
-                    <Cloud className="w-6 h-6 text-agent-weather mx-auto mb-2 group-hover:scale-110 transition-transform" />
-                    <h3 className="font-medium text-sm">Weather Info</h3>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Real-time weather updates
+                  <div className="group p-5 rounded-2xl bg-gradient-to-br from-card to-card/50 border border-border/30 shadow-soft hover:shadow-elevated transition-all duration-300 cursor-pointer hover:-translate-y-1">
+                    <div className="w-12 h-12 rounded-xl bg-agent-weather/10 flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+                      <Cloud className="w-6 h-6 text-agent-weather" />
+                    </div>
+                    <h3 className="font-semibold text-sm">Weather Info</h3>
+                    <p className="text-xs text-muted-foreground mt-1.5 leading-relaxed">
+                      Real-time weather forecasts
                     </p>
                   </div>
                 </div>
 
-                <div className="mt-8 text-xs text-muted-foreground">
-                  <p>Try asking:</p>
-                  <div className="flex flex-wrap justify-center gap-2 mt-2">
+                {/* Suggestion Pills */}
+                <div className="text-center">
+                  <p className="text-xs text-muted-foreground mb-3 font-medium uppercase tracking-wide">Try asking</p>
+                  <div className="flex flex-wrap justify-center gap-2">
                     {welcome.suggestions.map((suggestion, index) => (
                       <button
                         key={suggestion}
                         onClick={() => handleSend(suggestion)}
-                        className="px-3 py-1.5 rounded-full bg-muted hover:bg-primary/10 hover:text-primary transition-all duration-200 text-foreground hover-lift"
+                        className="px-4 py-2 rounded-full bg-gradient-to-r from-muted to-muted/50 hover:from-primary/10 hover:to-accent/10 border border-border/30 hover:border-primary/30 text-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-soft animate-fade-in"
                         style={{ animationDelay: `${index * 100}ms` }}
                       >
                         {suggestion}
@@ -183,22 +217,12 @@ export default function Index() {
                     ))}
                   </div>
                 </div>
-
-                {/* Input centered on welcome screen */}
-                <div className="w-full max-w-2xl mt-8 animate-fade-in" style={{ animationDelay: "300ms" }}>
-                  <ChatInput 
-                    onSend={handleSend} 
-                    isLoading={isLoading}
-                    defaultLanguage={profile?.preferred_language || "en"}
-                    onAutoSubmit={handleAutoSubmit}
-                  />
-                </div>
               </div>
             ) : (
-              /* Messages - scrollable area with input at bottom */
+              /* Messages - flowing top to bottom */
               <div className="flex-1 flex flex-col min-h-0">
                 <ScrollArea className="flex-1 pr-4" ref={scrollRef}>
-                  <div className="flex flex-col gap-4 py-2">
+                  <div className="flex flex-col gap-4 py-4">
                     {messages.map((message, index) => (
                       <div 
                         key={message.id} 
@@ -209,27 +233,17 @@ export default function Index() {
                       </div>
                     ))}
                     {isLoading && (
-                      <div className="flex items-center gap-2 text-muted-foreground animate-fade-in">
-                        <div className="flex gap-1">
-                          <span className="w-2 h-2 rounded-full bg-primary animate-thinking" style={{ animationDelay: "0ms" }} />
-                          <span className="w-2 h-2 rounded-full bg-primary animate-thinking" style={{ animationDelay: "200ms" }} />
-                          <span className="w-2 h-2 rounded-full bg-primary animate-thinking" style={{ animationDelay: "400ms" }} />
+                      <div className="flex items-center gap-3 text-muted-foreground animate-fade-in p-4 rounded-2xl bg-card/50 backdrop-blur-sm border border-border/30 max-w-xs">
+                        <div className="flex gap-1.5">
+                          <span className="w-2.5 h-2.5 rounded-full bg-primary animate-thinking" style={{ animationDelay: "0ms" }} />
+                          <span className="w-2.5 h-2.5 rounded-full bg-primary animate-thinking" style={{ animationDelay: "200ms" }} />
+                          <span className="w-2.5 h-2.5 rounded-full bg-primary animate-thinking" style={{ animationDelay: "400ms" }} />
                         </div>
-                        <span className="text-sm">Agents analyzing...</span>
+                        <span className="text-sm font-medium">Analyzing...</span>
                       </div>
                     )}
                   </div>
                 </ScrollArea>
-                
-                {/* Input at bottom when there are messages */}
-                <div className="pt-4 mt-auto border-t border-border/30">
-                  <ChatInput 
-                    onSend={handleSend} 
-                    isLoading={isLoading}
-                    defaultLanguage={profile?.preferred_language || "en"}
-                    onAutoSubmit={handleAutoSubmit}
-                  />
-                </div>
               </div>
             )}
           </section>

@@ -5,17 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Leaf, Mail, Lock, User, Loader2, Sparkles } from "lucide-react";
+import { Leaf, Mail, Lock, User, Loader2, Sparkles, ArrowLeft } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { lovable } from "@/integrations/lovable";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Auth() {
   const navigate = useNavigate();
   const { signIn, signUp } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   
   // Login form
   const [loginEmail, setLoginEmail] = useState("");
@@ -57,6 +59,25 @@ export default function Auth() {
     setIsLoading(false);
   };
 
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(forgotPasswordEmail, {
+      redirectTo: `${window.location.origin}/auth?reset=true`,
+    });
+
+    if (error) {
+      toast.error(error.message);
+    } else {
+      toast.success("Password reset link sent to your email!");
+      setShowForgotPassword(false);
+      setForgotPasswordEmail("");
+    }
+
+    setIsLoading(false);
+  };
+
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
     const { error } = await lovable.auth.signInWithOAuth("google", {
@@ -68,6 +89,83 @@ export default function Auth() {
       setIsGoogleLoading(false);
     }
   };
+
+  // Forgot Password View
+  if (showForgotPassword) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        {/* Decorative elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-96 h-96 bg-primary/15 rounded-full blur-3xl animate-float" />
+          <div className="absolute bottom-20 right-10 w-[500px] h-[500px] bg-secondary/15 rounded-full blur-3xl animate-float" style={{ animationDelay: "-2s" }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-accent/5 rounded-full blur-3xl" />
+          <div className="absolute inset-0 bg-gradient-to-br from-transparent via-background/50 to-background" />
+        </div>
+
+        <Card className="w-full max-w-md relative z-10 shadow-elevated border-border/30 backdrop-blur-xl bg-card/95">
+          <CardHeader className="text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/40 to-secondary/40 rounded-2xl blur-2xl" />
+                <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-glow">
+                  <Leaf className="w-10 h-10 text-primary-foreground" />
+                </div>
+              </div>
+            </div>
+            <div>
+              <CardTitle className="text-2xl font-bold text-gradient-primary">
+                Reset Password
+              </CardTitle>
+              <CardDescription className="text-muted-foreground mt-2">
+                Enter your email address and we'll send you a link to reset your password
+              </CardDescription>
+            </div>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handleForgotPassword} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="forgot-email" className="text-foreground text-sm font-medium">Email</Label>
+                <div className="relative group">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                  <Input
+                    id="forgot-email"
+                    type="email"
+                    placeholder="farmer@example.com"
+                    value={forgotPasswordEmail}
+                    onChange={(e) => setForgotPasswordEmail(e.target.value)}
+                    className="pl-11 h-12 rounded-xl bg-muted/30 border-border/50 focus:border-primary/50 focus:bg-muted/50 transition-all"
+                    required
+                  />
+                </div>
+              </div>
+              
+              <Button 
+                type="submit" 
+                className="w-full h-12 rounded-xl bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-all shadow-glow hover:shadow-elevated"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                ) : null}
+                Send Reset Link
+              </Button>
+              
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full h-10 rounded-xl"
+                onClick={() => setShowForgotPassword(false)}
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Sign In
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -129,7 +227,16 @@ export default function Auth() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="login-password" className="text-foreground text-sm font-medium">Password</Label>
+                  <div className="flex items-center justify-between">
+                    <Label htmlFor="login-password" className="text-foreground text-sm font-medium">Password</Label>
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-xs text-primary hover:text-primary/80 transition-colors font-medium"
+                    >
+                      Forgot password?
+                    </button>
+                  </div>
                   <div className="relative group">
                     <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <Input

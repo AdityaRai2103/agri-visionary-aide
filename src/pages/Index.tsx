@@ -224,24 +224,9 @@ export default function Index() {
           ) : (
             /* Chat View with messages */
             <>
-              {/* TOP INPUT BAR */}
-              <div className="mb-6 animate-fade-in">
-                <div className="relative">
-                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 rounded-2xl blur-xl opacity-50" />
-                  <div className="relative backdrop-blur-xl bg-card/95 rounded-2xl shadow-elevated border border-border/30 p-1.5">
-                    <ChatInput 
-                      onSend={handleSend} 
-                      isLoading={isLoading}
-                      defaultLanguage={profile?.preferred_language || "en"}
-                      onAutoSubmit={handleAutoSubmit}
-                    />
-                  </div>
-                </div>
-              </div>
-
               {/* Agent Network - Hide in simple mode */}
               {!isSimpleMode && (
-                <div className="mb-6">
+                <div className="mb-4">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-primary/10 to-secondary/10 border border-border/30">
                       <Sparkles className="w-3.5 h-3.5 text-primary" />
@@ -281,6 +266,29 @@ export default function Index() {
                   </ScrollArea>
                 </div>
               </section>
+
+              {/* BOTTOM INPUT BAR for follow-up questions */}
+              <div className="mt-4 animate-fade-in">
+                <div className="relative">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 via-secondary/20 to-accent/20 rounded-2xl blur-xl opacity-50" />
+                  <div className="relative backdrop-blur-xl bg-card/95 rounded-2xl shadow-elevated border border-border/30 p-1.5">
+                    <ChatInput 
+                      onSend={handleSend} 
+                      isLoading={isLoading}
+                      defaultLanguage={profile?.preferred_language || "en"}
+                      onAutoSubmit={handleAutoSubmit}
+                    />
+                  </div>
+                </div>
+                {/* Quick hints */}
+                <div className="flex items-center justify-center gap-2 mt-3 text-xs text-muted-foreground">
+                  <span>Upload crop images</span>
+                  <span>•</span>
+                  <span>Use voice input</span>
+                  <span>•</span>
+                  <span>Get farming advice</span>
+                </div>
+              </div>
             </>
           )}
         </div>

@@ -107,28 +107,28 @@ export function ChatInput({ onSend, isLoading, defaultLanguage = "en", onAutoSub
           <img
             src={imagePreview}
             alt="Preview"
-            className="h-20 w-auto rounded-lg shadow-soft border border-border"
+            className="h-16 w-auto rounded-xl shadow-soft border border-border/50 object-cover"
           />
           <button
             type="button"
             onClick={handleRemoveImage}
-            className="absolute -top-2 -right-2 p-1 bg-destructive text-destructive-foreground rounded-full shadow-soft hover:scale-110 transition-transform"
+            className="absolute -top-2 -right-2 p-1.5 bg-destructive text-destructive-foreground rounded-full shadow-soft hover:scale-110 transition-transform"
           >
             <X className="w-3 h-3" />
           </button>
         </div>
       )}
 
-      {/* Input Area */}
-      <div className="flex items-end gap-2 p-2 bg-card rounded-2xl shadow-card border border-border/50">
+      {/* Modern Input Area */}
+      <div className="flex items-center gap-1.5 p-1.5 bg-transparent rounded-xl">
         {/* Language Selector */}
         <Select value={language} onValueChange={setLanguage}>
-          <SelectTrigger className="w-auto border-0 bg-transparent hover:bg-muted/50 h-10 px-2">
-            <span className="text-lg">{LANGUAGES.find(l => l.code === language)?.flag}</span>
+          <SelectTrigger className="w-auto border-0 bg-muted/50 hover:bg-muted rounded-xl h-10 px-3 transition-colors">
+            <span className="text-base">{LANGUAGES.find(l => l.code === language)?.flag}</span>
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="rounded-xl">
             {LANGUAGES.map(lang => (
-              <SelectItem key={lang.code} value={lang.code}>
+              <SelectItem key={lang.code} value={lang.code} className="rounded-lg">
                 <span className="flex items-center gap-2">
                   <span>{lang.flag}</span>
                   <span>{lang.name}</span>
@@ -151,7 +151,7 @@ export function ChatInput({ onSend, isLoading, defaultLanguage = "en", onAutoSub
           variant="ghost"
           size="icon"
           onClick={() => fileInputRef.current?.click()}
-          className="flex-shrink-0 text-muted-foreground hover:text-primary hover:bg-primary/10"
+          className="flex-shrink-0 h-10 w-10 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"
           disabled={isLoading}
         >
           <ImagePlus className="w-5 h-5" />
@@ -169,7 +169,7 @@ export function ChatInput({ onSend, isLoading, defaultLanguage = "en", onAutoSub
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={getPlaceholder()}
-          className="flex-1 min-h-[44px] max-h-32 resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
+          className="flex-1 min-h-[40px] max-h-28 resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/50 text-sm py-2.5"
           disabled={isLoading}
           rows={1}
         />
@@ -180,24 +180,24 @@ export function ChatInput({ onSend, isLoading, defaultLanguage = "en", onAutoSub
           size="icon"
           disabled={isLoading || (!message.trim() && !imageFile)}
           className={cn(
-            "flex-shrink-0 rounded-xl transition-all",
+            "flex-shrink-0 h-10 w-10 rounded-xl transition-all duration-300",
             message.trim() || imageFile
-              ? "bg-primary hover:bg-primary/90"
+              ? "bg-primary hover:bg-primary/90 shadow-soft hover:shadow-elevated hover:scale-105"
               : "bg-muted text-muted-foreground"
           )}
         >
           {isLoading ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
+            <Loader2 className="w-4 h-4 animate-spin" />
           ) : (
-            <Send className="w-5 h-5" />
+            <Send className="w-4 h-4" />
           )}
         </Button>
       </div>
 
-      <p className="text-xs text-muted-foreground text-center mt-2">
-        {language === "hi" ? "फसल की तस्वीरें अपलोड करें या खेती के बारे में सवाल पूछें" :
-         language === "mr" ? "पिकांचे फोटो अपलोड करा किंवा शेतीबद्दल प्रश्न विचारा" :
-         "Upload crop images for disease detection or ask questions about farming"}
+      <p className="text-[11px] text-muted-foreground/70 text-center mt-2">
+        {language === "hi" ? "फसल की तस्वीरें अपलोड करें • आवाज से पूछें • खेती की सलाह पाएं" :
+         language === "mr" ? "पिकांचे फोटो अपलोड करा • आवाजाने विचारा • शेतीची सल्ला घ्या" :
+         "Upload crop images • Use voice input • Get farming advice"}
       </p>
     </form>
   );

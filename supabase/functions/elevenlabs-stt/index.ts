@@ -12,10 +12,12 @@ serve(async (req) => {
   }
 
   try {
-    const ELEVENLABS_API_KEY = Deno.env.get("ELEVENLABS_API_KEY");
-    if (!ELEVENLABS_API_KEY) {
+    const rawApiKey = Deno.env.get("ELEVENLABS_API_KEY");
+    if (!rawApiKey) {
       throw new Error("ELEVENLABS_API_KEY is not configured");
     }
+    // Trim whitespace and newlines that can cause ByteString errors
+    const ELEVENLABS_API_KEY = rawApiKey.trim().replace(/[\r\n]/g, "");
 
     const { audioBase64 } = await req.json();
 

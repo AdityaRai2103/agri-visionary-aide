@@ -16,6 +16,7 @@ interface ChatInputProps {
   onSend: (message: string, imageFile?: File, language?: string) => void;
   isLoading: boolean;
   defaultLanguage?: string;
+  onAutoSubmit?: (message: string, language: string) => void;
 }
 
 const LANGUAGES = [
@@ -24,7 +25,7 @@ const LANGUAGES = [
   { code: "mr", name: "मराठी", flag: "🇮🇳" },
 ];
 
-export function ChatInput({ onSend, isLoading, defaultLanguage = "en" }: ChatInputProps) {
+export function ChatInput({ onSend, isLoading, defaultLanguage = "en", onAutoSubmit }: ChatInputProps) {
   const [message, setMessage] = useState("");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -72,10 +73,18 @@ export function ChatInput({ onSend, isLoading, defaultLanguage = "en" }: ChatInp
   };
 
   const handleVoiceTranscript = (text: string, detectedLanguage: string) => {
-    setMessage(prev => prev ? `${prev} ${text}` : text);
-    // Auto-detect language from voice
-    if (detectedLanguage && LANGUAGES.find(l => l.code === detectedLanguage)) {
-      setLanguage(detectedLanguage);
+    const lang = detectedLanguage && LANGUAGES.find(l => l.code === detectedLanguage) 
+      ? detectedLanguage 
+      : language;
+    
+    // Auto-submit immediately after voice transcription
+    if (onAutoSubmit && text.trim()) {
+      onAutoSubmit(text, lang);
+    } else {
+      setMessage(prev => prev ? `${prev} ${text}` : text);
+      if (detectedLanguage && LANGUAGES.find(l => l.code === detectedLanguage)) {
+        setLanguage(detectedLanguage);
+      }
     }
   };
 

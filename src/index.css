@@ -160,6 +160,47 @@
     background-size: 200% 200%;
     animation: gradient-shift 8s ease infinite;
   }
+
+  .hover-lift {
+    @apply transition-all duration-300 ease-out;
+  }
+  
+  .hover-lift:hover {
+    @apply -translate-y-1 shadow-elevated;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300;
+  }
+  
+  .hover-glow:hover {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+  }
+
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--primary) / 0.1) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+  }
+
+  .animate-bounce-subtle {
+    animation: bounce-subtle 2s ease-in-out infinite;
+  }
+
+  .stagger-animation > * {
+    @apply animate-fade-in;
+  }
+  
+  .stagger-animation > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger-animation > *:nth-child(2) { animation-delay: 100ms; }
+  .stagger-animation > *:nth-child(3) { animation-delay: 200ms; }
+  .stagger-animation > *:nth-child(4) { animation-delay: 300ms; }
+  .stagger-animation > *:nth-child(5) { animation-delay: 400ms; }
 }
 
 @keyframes float {
@@ -170,6 +211,26 @@
 @keyframes gradient-shift {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes ripple {
+  0% { transform: scale(0.8); opacity: 1; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+@keyframes slide-up {
+  0% { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
 }
 
 /* Custom scrollbar */

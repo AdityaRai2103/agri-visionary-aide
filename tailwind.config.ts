@@ -98,6 +98,14 @@ export default {
           "0%, 100%": { opacity: "0.4" },
           "50%": { opacity: "1" },
         },
+        "bounce-subtle": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-5px)" },
+        },
+        "glow-pulse": {
+          "0%, 100%": { boxShadow: "0 0 5px hsl(var(--primary) / 0.2)" },
+          "50%": { boxShadow: "0 0 20px hsl(var(--primary) / 0.4)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -106,6 +114,8 @@ export default {
         "slide-in-right": "slide-in-right 0.3s ease-out",
         "scale-in": "scale-in 0.2s ease-out",
         "thinking": "thinking 1.5s ease-in-out infinite",
+        "bounce-subtle": "bounce-subtle 2s ease-in-out infinite",
+        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],

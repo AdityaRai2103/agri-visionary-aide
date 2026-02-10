@@ -101,7 +101,15 @@ ${agentInstructions}
 
 5. **Aggregated Response**: Combine insights from all agents into cohesive bullet points. Do not separate by agent - present unified recommendations.
 
-6. **Citations**: When using web search results, cite the sources.
+6. **Citations & References**: Always include relevant reference sources at the end of your response. Use these authoritative agricultural portals as references where applicable:
+   - CROPSAP Maharashtra: https://cropsap.maharashtra.gov.in
+   - Krishi Maharashtra: https://krishi.maharashtra.gov.in
+   - MahaAgri: https://mahaagri.gov.in
+   - Plantwise Plus Knowledge Bank: https://plantwiseplusknowledgebank.org
+   - Plantix: https://plantix.net
+   - American Phytopathological Society: https://aps.org
+   - ICAR: https://icar.org.in
+   Only cite sources that are relevant to the specific topic discussed. Add them under a "References:" section at the end.
 
 7. **Local Context**: Always consider Maharashtra's specific conditions - climate zones, common crop varieties, local practices, and government schemes.
 

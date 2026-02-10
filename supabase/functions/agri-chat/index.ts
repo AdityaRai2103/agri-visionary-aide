@@ -144,9 +144,20 @@ serve(async (req) => {
        language === "mr" ? "माफ करा, मी उत्तर देऊ शकलो नाही. कृपया पुन्हा प्रयत्न करा." :
        "I apologize, but I couldn't generate a response. Please try again.");
 
+    // Always include reference sources - merge web search sources with default agricultural references
+    const defaultSources = [
+      "https://cropsap.maharashtra.gov.in",
+      "https://krishi.maharashtra.gov.in",
+      "https://mahaagri.gov.in",
+      "https://icar.org.in",
+    ];
+    const allSources = sources.length > 0 
+      ? [...new Set([...sources, ...defaultSources])]
+      : defaultSources;
+
     const chatResponse: ChatResponse = {
       response: assistantResponse,
-      sources: sources.length > 0 ? sources : undefined,
+      sources: allSources,
       detectedLanguage: language,
     };
 

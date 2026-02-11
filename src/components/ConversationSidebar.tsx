@@ -8,8 +8,28 @@ import {
   Trash2, 
   Menu,
   X,
-  Clock
+  Clock,
+  History
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { subHours, subDays, subMonths } from "date-fns";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
@@ -39,6 +59,8 @@ export function ConversationSidebar({
 }: ConversationSidebarProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deleteRange, setDeleteRange] = useState<string>("");
 
   useEffect(() => {
     fetchConversations();
@@ -55,6 +77,62 @@ export function ConversationSidebar({
       setConversations(data);
     }
     setLoading(false);
+  };
+
+  const handleDeleteByRange = (range: string) => {
+    setDeleteRange(range);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteByRange = async () => {
+    let cutoffDate: Date;
+    const now = new Date();
+
+    switch (deleteRange) {
+      case "24h":
+        cutoffDate = subHours(now, 24);
+        break;
+      case "7d":
+        cutoffDate = subDays(now, 7);
+        break;
+      case "1m":
+        cutoffDate = subMonths(now, 1);
+        break;
+      case "all":
+        cutoffDate = new Date(0);
+        break;
+      default:
+        return;
+    }
+
+    const { error } = await supabase
+      .from("conversations")
+      .delete()
+      .eq("user_id", userId)
+      .gte("created_at", cutoffDate.toISOString());
+
+    if (!error) {
+      setConversations(prev =>
+        prev.filter(c => new Date(c.created_at) < cutoffDate)
+      );
+      if (
+        currentConversationId &&
+        conversations.find(c => c.id === currentConversationId && new Date(c.created_at) >= cutoffDate)
+      ) {
+        onNewConversation();
+      }
+    }
+    setDeleteDialogOpen(false);
+  };
+
+  const getRangeLabel = (range: string) => {
+    switch (range) {
+      case "24h": return "last 24 hours";
+      case "7d": return "last 7 days";
+      case "1m": return "last month";
+      case "all": return "all time";
+      default: return "";
+    }
   };
 
   const deleteConversation = async (id: string, e: React.MouseEvent) => {
@@ -94,7 +172,7 @@ export function ConversationSidebar({
       >
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="p-4 border-b border-border">
+          <div className="p-4 border-b border-border space-y-2">
             <Button
               onClick={onNewConversation}
               className="w-full bg-primary hover:bg-primary/90"
@@ -102,6 +180,36 @@ export function ConversationSidebar({
               <Plus className="w-4 h-4 mr-2" />
               New Conversation
             </Button>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full" size="sm">
+                  <History className="w-4 h-4 mr-2" />
+                  Delete History
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56">
+                <DropdownMenuLabel>Delete conversations from</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleDeleteByRange("24h")}>
+                  <Clock className="w-4 h-4 mr-2" />
+                  Last 24 hours
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleDeleteByRange("7d")}>
+                  <Clock className="w-4 h-4 mr-2" />
+                  Last 7 days
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleDeleteByRange("1m")}>
+                  <Clock className="w-4 h-4 mr-2" />
+                  Last month
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => handleDeleteByRange("all")} className="text-destructive focus:text-destructive">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  All time
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Conversation List */}
@@ -169,6 +277,24 @@ export function ConversationSidebar({
           onClick={onToggle}
         />
       )}
+
+      {/* Delete History Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete conversation history</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete all conversations from the <strong>{getRangeLabel(deleteRange)}</strong>? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteByRange} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
